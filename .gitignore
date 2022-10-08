@@ -1,3 +1,8 @@
 __pycache__
 part1/__pycache__
+part1/__pycache__/*.py
+part2/__pycache__/
+assignment_0/part2/__pycache__
+
+
 
