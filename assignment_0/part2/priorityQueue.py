@@ -3,18 +3,33 @@ import random # To test the sorting, see below
 import time   # To count the sorting execution
 
 class PriorityQueue():
+    """
+    Custom PriorityQueue implementation using the
+    library heapq.py for the impementation of heap
+    Source: https://docs.python.org/3/library/heapq.html
+    """
+    
     def __init__(self):
-        self.heap = []
-        self.count = 0
+        self.heap = [] # Initializing an empty heap 
+        self.count = 0 # Number of elements in heap
     def isEmpty(self):
+        """
+        Return True if Queue is empty otherwise returns False
+        """
         return True if self.count == 0 else False
     
     def push(self, item, priority):
-        heapq.heappush(self.heap, (priority, item))
+        """
+        Inserts the item with priority in queue
+        """
+        heapq.heappush(self.heap, (priority, item)) # Implements the heappush of heapq library
         self.count+=1
     
     def pop(self):
-        if self.count != 0:
+        """
+        Returns the item of the queue with the minimum priority
+        """
+        if self.count != 0: # If queue is non empty do the job
             self.count-=1
             value = heapq.heappop(self.heap)[1]
             return value
@@ -22,21 +37,32 @@ class PriorityQueue():
             print("Queue is empty!")
     
     def update(self, item, priority):
+        """
+        If the item already belongs in queue and the priority is higher
+        than the priority of the argument, then the method updates the
+        priority of the item. Otherwise no action is made. Finally,
+        if the items is not in the queue then it uses the push method.
+        """
         all_items = [x[1] for x in self.heap]
         if item in all_items:
             idx = all_items.index(item)
             value = self.heap[idx][0]
             if value > priority:
-                self.heap[idx][0] = priority
+                self.heap[idx] = priority,item
+                heapq.heapify(self.heap)
         else:
             self.push(item, priority)
             
 def PQSort(unsorted_list):
+    """
+    Sorting a list in ascending order
+    using a PriorityQueue
+    """
     sorted = []
     q = PriorityQueue()
-    for value in unsorted_list:
+    for value in unsorted_list: # Insert all elements in queue
         q.push(value, value)
-    while q.count != 0:
+    while q.count != 0: # Pop all the elements one by one
         sorted.append(q.pop())
     return sorted
 
