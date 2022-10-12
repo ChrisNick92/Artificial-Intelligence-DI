@@ -12,6 +12,9 @@ class PriorityQueue():
     def __init__(self):
         self.heap = [] # Initializing an empty heap 
         self.count = 0 # Number of elements in heap
+        self.items_state = {} # A dictionary to keep the items and their priorities (keys are items and values are lists)
+        self.items_on_heap = set() # A set that keep tracks of the unique items on heap
+        
     def isEmpty(self):
         """
         Return True if Queue is empty otherwise returns False
@@ -20,10 +23,21 @@ class PriorityQueue():
     
     def push(self, item, priority):
         """
-        Inserts the item with priority in queue
+        Inserts the item with priority in queue, if there exists
+        an item with the same priority then the method doesn't
+        insert the item in order to avoid duplicates.
         """
-        heapq.heappush(self.heap, (priority, item)) # Implements the heappush of heapq library
-        self.count+=1
+        p = self.check_duplicate(item, priority)
+        if p == 1: # The pair (item, priority) is not contained in heap, push the element
+            heapq.heappush(self.heap, (priority, item)) # Implements the heappush of heapq library
+            self.count+=1
+            self.items_on_heap.add(item)
+            self.items_state[item] = [priority]
+        elif p == 2:
+            heapq.heappush(self.heap, (priority, item))
+            self.count+=1
+            self.items_state[item] += [priority]
+            
     
     def pop(self):
         """
@@ -38,21 +52,47 @@ class PriorityQueue():
     
     def update(self, item, priority):
         """
-        If the item already belongs in queue and the priority is higher
-        than the priority of the argument, then the method updates the
-        priority of the item. Otherwise no action is made. Finally,
-        if the items is not in the queue then it uses the push method.
+        If the item already belongs in heap and the given priority
+        is the minimum amongst all priorities then it discards all
+        items and pushes the pair (item, priority). If there is at
+        least one item with lower priority then the method makes
+        no action and if the item is not contained in heap the method
+        pushes the pair (item, priority).
         """
-        all_items = [x[1] for x in self.heap]
-        if item in all_items:
-            idx = all_items.index(item)
-            value = self.heap[idx][0]
-            if value > priority:
-                self.heap[idx] = priority,item
-                heapq.heapify(self.heap)
-        else:
-            self.push(item, priority)
+        if item not in self.items_on_heap: # Perform a simple push
+            self.items_on_heap.add(item)
+            self.items_state[item] = [priority]
+            self.count += 1
+            heapq.heappush(self.heap, (priority, item))
+        else: # The item is contained in heap
+            if priority < min(self.items_state[item]): # Update
+                self.count = 0
+                temp_heap = self.heap
+                self.heap = []
+                for value_h, item_h in temp_heap:
+                    if item_h != item:
+                        heapq.heappush(self.heap, (value_h,item_h))
+                        self.count +=1
+                heapq.heappush(self.heap,(priority,item))
+                self.count+=1
+                self.items_state[item] = [priority]
+                        
             
+    def check_duplicate(self,item, priority):
+        """
+        This method checks whether the pair (item, priority)
+        is contained on heap. If the item is not contained in
+        heap then it returns 1, if the item is contained but
+        none of the items has the insertion priority it returns 2,
+        if the pair (item,priority) is contained in heap, it returns -1.
+        """
+        if item in self.items_on_heap and priority in self.items_state[item]:
+            return -1
+        elif item in self.items_on_heap and not priority in self.items_state[item]:
+            return 2
+        else:
+            return 1
+        
 def PQSort(unsorted_list):
     """
     Sorting a list in ascending order
@@ -81,7 +121,7 @@ def test_sorting(test = {"START": 1, "END": 1000000, "K": 100000}):
     """
     times = {"Custom": 0.0, "Python": 0.0}
     print(f"{5*'-'}> Performing a sorting test <{5*'-'}")
-    print(f"- Selecting {test['K']} random integer values from the interval [{test['START']},{test['END']}]")
+    print(f"- Selecting {test['K']} random integer values w/0 replacement from the interval [{test['START']},{test['END']}]")
     x = random.sample(range(test["START"], test["END"]), test["K"])
     print(f"- Sorting...")
     tic = time.time()
