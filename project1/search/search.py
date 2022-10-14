@@ -19,6 +19,10 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+from custom_functions import expand_tree, tree_node
+from custom_functions import get_path
+
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -87,16 +91,56 @@ def depthFirstSearch(problem: SearchProblem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
+    
+    # My implementation of GraphSearch with DFS
+    # DFS is implemented using a stack 
+    fringe = util.Stack() # Initialize an empty stack
+    closed = set()
+    starting_node = tree_node(state = problem.getStartState(),
+                              ParentNode=None, Action=None, PathCost=0,
+                              Depth=0) # Initialize the Starting node
+    fringe.push(starting_node) # Append the starting node in stack
+    while not fringe.isEmpty():
+        node = fringe.pop()
+        if problem.isGoalState(node.state): # Then we have found the goal state
+            return get_path(node) # Return the path that leads to the goal
+        elif node.state not in closed:
+            closed.add(node.state)
+            fringe = expand_tree(node, fringe, problem)
+    if fringe.isEmpty():
+        print(f"- Search algorithm finished without reaching to a solution.")
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    
+    # My BFS Iplementation of GraphSearch with BFS
+    # BFS is implemented using a queue
+    fringe = util.Queue() # Initialize an empty stack
+    closed = set()
+    starting_node = tree_node(state = problem.getStartState(),
+                              ParentNode=None, Action=None, PathCost=0,
+                              Depth=0) # Initialize the Starting node
+    fringe.push(starting_node) # Append the starting node in stack
+    while not fringe.isEmpty():
+        node = fringe.pop()
+        if problem.isGoalState(node.state): # Then we have found the goal state
+            return get_path(node) # Return the path that leads to the goal
+        elif node.state not in closed:
+            closed.add(node.state)
+            fringe = expand_tree(node, fringe, problem)
+    if fringe.isEmpty():
+        print(f"- Search algorithm finished without reaching to a solution.")
+     
     util.raiseNotDefined()
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    
+    # My Iplementation of uniform-cost graph
+    
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
