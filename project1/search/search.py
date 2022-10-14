@@ -106,7 +106,7 @@ def depthFirstSearch(problem: SearchProblem):
             return get_path(node) # Return the path that leads to the goal
         elif node.state not in closed:
             closed.add(node.state)
-            fringe = expand_tree(node, fringe, problem)
+            fringe = expand_tree(node, fringe, problem, mode = "DFS")
     if fringe.isEmpty():
         print(f"- Search algorithm finished without reaching to a solution.")
     util.raiseNotDefined()
@@ -122,14 +122,14 @@ def breadthFirstSearch(problem: SearchProblem):
     starting_node = tree_node(state = problem.getStartState(),
                               ParentNode=None, Action=None, PathCost=0,
                               Depth=0) # Initialize the Starting node
-    fringe.push(starting_node) # Append the starting node in stack
+    fringe.push(starting_node) # Append the starting node in queue
     while not fringe.isEmpty():
         node = fringe.pop()
         if problem.isGoalState(node.state): # Then we have found the goal state
             return get_path(node) # Return the path that leads to the goal
         elif node.state not in closed:
             closed.add(node.state)
-            fringe = expand_tree(node, fringe, problem)
+            fringe = expand_tree(node, fringe, problem, mode = "BFS")
     if fringe.isEmpty():
         print(f"- Search algorithm finished without reaching to a solution.")
      
@@ -140,6 +140,24 @@ def uniformCostSearch(problem: SearchProblem):
     "*** YOUR CODE HERE ***"
     
     # My Iplementation of uniform-cost graph
+    # UCS is implemented using a priorityQueue where the
+    # node with the minimum cost path has the highest priority
+    
+    fringe = util.PriorityQueue() # Initialize an empty priority Queue
+    closed = set()
+    starting_node = tree_node(state = problem.getStartState(),
+                              ParentNode=None, Action=None, PathCost=0,
+                              Depth=0) # Initialize the Starting node
+    fringe.push(starting_node, starting_node.pathcost) # Append the starting node in queue
+    while not fringe.isEmpty():
+        node = fringe.pop()
+        if problem.isGoalState(node.state): # Then we have found the goal state
+            return get_path(node) # Return the path that leads to the goal
+        elif node.state not in closed:
+            closed.add(node.state)
+            fringe = expand_tree(node, fringe, problem, mode = "UCS")
+    if fringe.isEmpty():
+        print(f"- Search algorithm finished without reaching to a solution.")
     
     util.raiseNotDefined()
 
