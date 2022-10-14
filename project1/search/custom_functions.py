@@ -26,15 +26,17 @@ def get_path(node):
     return list(reversed(moves))
         
         
-def expand_tree(node, fringe, problem):
+def expand_tree(node, fringe, problem, mode = "BFS"):
     """This is implemented only for DFS - Stack data structure"""
     successors = problem.getSuccessors(node.state) # Get successors of current node
     # Push to the data structure
     for successor in successors:
         # Successors has is a triple of the form (state, action, cost)
         temp_node = tree_node(state = successor[0], ParentNode=node,
-                              Action=successor[1], PathCost=node.pathcost+1,
+                              Action=successor[1], PathCost=node.pathcost+successor[2],
                               Depth=node.depth + 1)
-        fringe.push(temp_node)
-        
+        if mode == "BFS" or mode == "DFS":
+            fringe.push(temp_node)
+        elif mode == "UCS":
+            fringe.update(temp_node,temp_node.pathcost)
     return fringe
