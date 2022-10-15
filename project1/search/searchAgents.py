@@ -34,6 +34,7 @@ description for details.
 Good luck and happy searching!
 """
 
+from tabnanny import check
 from typing import List, Tuple, Any
 from game import Directions
 from game import Agent
@@ -292,13 +293,22 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-
+        
+        self.goal_state = {(1,1):0, (1,top):0, (right,1) :0, (right, top):0}
+        
+        self.costFn = lambda x: 1
+        
+        self.corner_list = list(self.corners)
+        if self.startingPosition in self.corner_list:
+            self.goal_state[self.startingPosition] = 1
+        
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
         "*** YOUR CODE HERE ***"
+        return self.startingPosition
         util.raiseNotDefined()
 
     def isGoalState(self, state: Any):
@@ -306,6 +316,15 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
+        if state in self.corner_list:
+            self.goal_state[state] = 1
+            print(self.goal_state)
+            for _,val in self.goal_state.items():
+                if val != 1:
+                    return False
+            return True
+        else:
+            return False
         util.raiseNotDefined()
 
     def getSuccessors(self, state: Any):
@@ -329,6 +348,13 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            x,y = state
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                nextState = (nextx, nexty)
+                cost = self.costFn(nextState)
+                successors.append( ( nextState, action, cost) )
 
         self._expanded += 1 # DO NOT CHANGE
         return successors

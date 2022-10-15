@@ -22,7 +22,6 @@ import util
 from custom_functions import expand_tree, tree_node
 from custom_functions import get_path
 
-
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -155,7 +154,8 @@ def uniformCostSearch(problem: SearchProblem):
             return get_path(node) # Return the path that leads to the goal
         elif node.state not in closed:
             closed.add(node.state)
-            fringe = expand_tree(node, fringe, problem, mode = "UCS")
+            priority = node.pathcost
+            fringe = expand_tree(node = node, fringe = fringe, problem = problem, mode = "UCS")
     if fringe.isEmpty():
         print(f"- Search algorithm finished without reaching to a solution.")
     
@@ -168,9 +168,34 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+from util import manhattanDistance
+
+
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    
+    # My implementation of aStar algorithm
+    # We use a queue with function as a data structure
+    fringe = util.PriorityQueue() # Initialize an empty priority Queue/L1 distance
+    closed = set()
+    starting_node = tree_node(state = problem.getStartState(),
+                              ParentNode=None, Action=None, PathCost=0,
+                              Depth=0) # Initialize the Starting node
+    priority = starting_node.pathcost+heuristic(starting_node.state, problem)
+    fringe.push(starting_node, priority) # Append the starting node in queue
+    while not fringe.isEmpty():
+        node = fringe.pop()
+        if problem.isGoalState(node.state): # Then we have found the goal state
+            return get_path(node) # Return the path that leads to the goal
+        elif node.state not in closed:
+            priority = node.pathcost + heuristic(node.state, problem) # The priority is the sum of pathcost + heuristic
+            closed.add(node.state)
+            fringe = expand_tree(node = node, fringe = fringe, problem = problem, 
+                                 mode = "aStar", heuristic=heuristic)
+    if fringe.isEmpty():
+        print(f"- Search algorithm finished without reaching to a solution.")
+    
     util.raiseNotDefined()
 
 

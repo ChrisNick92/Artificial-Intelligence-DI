@@ -9,7 +9,7 @@ class tree_node():
     of the search tree for BFS, DFS, UFS etc.
     """
     def __init__(self, state, ParentNode, Action, PathCost,
-                 Depth):
+                 Depth, L1_dist = None):
         self.state = state
         self.parentnode = ParentNode
         self.action = Action
@@ -26,8 +26,9 @@ def get_path(node):
     return list(reversed(moves))
         
         
-def expand_tree(node, fringe, problem, mode = "BFS"):
-    """This is implemented only for DFS - Stack data structure"""
+def expand_tree(node, fringe, problem, mode = "BFS",
+                heuristic = None):
+    """Categorical variable mode determines the type of algorithm BFS/DFS/UCS etc"""
     successors = problem.getSuccessors(node.state) # Get successors of current node
     # Push to the data structure
     for successor in successors:
@@ -38,5 +39,10 @@ def expand_tree(node, fringe, problem, mode = "BFS"):
         if mode == "BFS" or mode == "DFS":
             fringe.push(temp_node)
         elif mode == "UCS":
-            fringe.update(temp_node,temp_node.pathcost)
+            priority = temp_node.pathcost
+            fringe.update(temp_node, priority)
+        elif mode == "aStar":
+            priority = temp_node.pathcost + heuristic(temp_node.state, problem)
+            fringe.push(temp_node, priority)
     return fringe
+
