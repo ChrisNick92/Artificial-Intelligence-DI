@@ -294,13 +294,7 @@ class CornersProblem(search.SearchProblem):
         # in initializing the problem
         "*** YOUR CODE HERE ***"
         
-        self.goal_state = {(1,1):0, (1,top):0, (right,1) :0, (right, top):0}
-        
         self.costFn = lambda x: 1
-        
-        self.corner_list = list(self.corners)
-        if self.startingPosition in self.corner_list:
-            self.goal_state[self.startingPosition] = 1
         
     def getStartState(self):
         """
@@ -308,7 +302,11 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        return self.startingPosition
+        starting_visited_corners = []
+        point = self.startingPosition
+        if point in self.corners:
+            starting_visited_corners.append(point)
+        return point, starting_visited_corners
         util.raiseNotDefined()
 
     def isGoalState(self, state: Any):
@@ -316,15 +314,13 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        if state in self.corner_list:
-            self.goal_state[state] = 1
-            print(self.goal_state)
-            for _,val in self.goal_state.items():
-                if val != 1:
-                    return False
-            return True
-        else:
-            return False
+        point = state[0]
+        visited_corners = state[1]
+        if point in self.corners:
+            if not point in visited_corners:
+                visited_corners.append(point)
+            return len(visited_corners) == 4
+        return False
         util.raiseNotDefined()
 
     def getSuccessors(self, state: Any):
@@ -348,13 +344,17 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-            x,y = state
+            x,y = state[0]
+            visited_corners = state[1]
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             if not self.walls[nextx][nexty]:
+                successors_visited_corners = list(visited_corners)
                 nextState = (nextx, nexty)
+                if nextState in self.corners and nextState not in visited_corners:
+                    successors_visited_corners.append(nextState)
                 cost = self.costFn(nextState)
-                successors.append( ( nextState, action, cost) )
+                successors.append(((nextState, successors_visited_corners), action, cost))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors

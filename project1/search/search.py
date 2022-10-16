@@ -94,7 +94,7 @@ def depthFirstSearch(problem: SearchProblem):
     # My implementation of GraphSearch with DFS
     # DFS is implemented using a stack 
     fringe = util.Stack() # Initialize an empty stack
-    closed = set()
+    closed = []
     starting_node = tree_node(state = problem.getStartState(),
                               ParentNode=None, Action=None, PathCost=0,
                               Depth=0) # Initialize the Starting node
@@ -104,7 +104,7 @@ def depthFirstSearch(problem: SearchProblem):
         if problem.isGoalState(node.state): # Then we have found the goal state
             return get_path(node) # Return the path that leads to the goal
         elif node.state not in closed:
-            closed.add(node.state)
+            closed.append(node.state)
             fringe = expand_tree(node, fringe, problem, mode = "DFS")
     if fringe.isEmpty():
         print(f"- Search algorithm finished without reaching to a solution.")
@@ -117,7 +117,7 @@ def breadthFirstSearch(problem: SearchProblem):
     # My BFS Iplementation of GraphSearch with BFS
     # BFS is implemented using a queue
     fringe = util.Queue() # Initialize an empty stack
-    closed = set()
+    closed = []
     starting_node = tree_node(state = problem.getStartState(),
                               ParentNode=None, Action=None, PathCost=0,
                               Depth=0) # Initialize the Starting node
@@ -127,7 +127,7 @@ def breadthFirstSearch(problem: SearchProblem):
         if problem.isGoalState(node.state): # Then we have found the goal state
             return get_path(node) # Return the path that leads to the goal
         elif node.state not in closed:
-            closed.add(node.state)
+            closed.append(node.state)
             fringe = expand_tree(node, fringe, problem, mode = "BFS")
     if fringe.isEmpty():
         print(f"- Search algorithm finished without reaching to a solution.")
@@ -143,7 +143,7 @@ def uniformCostSearch(problem: SearchProblem):
     # node with the minimum cost path has the highest priority
     
     fringe = util.PriorityQueue() # Initialize an empty priority Queue
-    closed = set()
+    closed = []
     starting_node = tree_node(state = problem.getStartState(),
                               ParentNode=None, Action=None, PathCost=0,
                               Depth=0) # Initialize the Starting node
@@ -153,7 +153,7 @@ def uniformCostSearch(problem: SearchProblem):
         if problem.isGoalState(node.state): # Then we have found the goal state
             return get_path(node) # Return the path that leads to the goal
         elif node.state not in closed:
-            closed.add(node.state)
+            closed.append(node.state)
             priority = node.pathcost
             fringe = expand_tree(node = node, fringe = fringe, problem = problem, mode = "UCS")
     if fringe.isEmpty():

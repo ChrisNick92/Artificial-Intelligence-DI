@@ -9,13 +9,12 @@ class tree_node():
     of the search tree for BFS, DFS, UFS etc.
     """
     def __init__(self, state, ParentNode, Action, PathCost,
-                 Depth, L1_dist = None):
+                 Depth):
         self.state = state
         self.parentnode = ParentNode
         self.action = Action
         self.pathcost = PathCost
         self.depth = Depth
-        
         
 def get_path(node):
     moves = []
