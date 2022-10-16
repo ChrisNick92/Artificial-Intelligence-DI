@@ -34,6 +34,7 @@ description for details.
 Good luck and happy searching!
 """
 
+from distutils import core
 from tabnanny import check
 from typing import List, Tuple, Any
 from game import Directions
@@ -390,7 +391,20 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    current_point = state[0]
+    visited_corners = state[1]
+    total_cost = 0
+    left_to_visit = []
+    for corner in corners:
+        if not corner in visited_corners:
+            left_to_visit.append(corner)
+    while left_to_visit:
+        pair = min([(util.manhattanDistance(current_point,next_corner),next_corner) for next_corner in left_to_visit])
+        current_point = pair[1]
+        total_cost += pair[0]
+        left_to_visit.remove(current_point)
+    # return 0 # Default to trivial solution
+    return total_cost
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"

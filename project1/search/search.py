@@ -178,7 +178,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     # My implementation of aStar algorithm
     # We use a queue with function as a data structure
     fringe = util.PriorityQueue() # Initialize an empty priority Queue/L1 distance
-    closed = set()
+    closed = []
     starting_node = tree_node(state = problem.getStartState(),
                               ParentNode=None, Action=None, PathCost=0,
                               Depth=0) # Initialize the Starting node
@@ -190,7 +190,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
             return get_path(node) # Return the path that leads to the goal
         elif node.state not in closed:
             priority = node.pathcost + heuristic(node.state, problem) # The priority is the sum of pathcost + heuristic
-            closed.add(node.state)
+            closed.append(node.state)
             fringe = expand_tree(node = node, fringe = fringe, problem = problem, 
                                  mode = "aStar", heuristic=heuristic)
     if fringe.isEmpty():
