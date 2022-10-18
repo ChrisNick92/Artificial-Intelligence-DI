@@ -116,7 +116,7 @@ def breadthFirstSearch(problem: SearchProblem):
     
     # My BFS Iplementation of GraphSearch with BFS
     # BFS is implemented using a queue
-    fringe = util.Queue() # Initialize an empty stack
+    fringe = util.Queue() # Initialize an empty queue
     closed = []
     starting_node = tree_node(state = problem.getStartState(),
                               ParentNode=None, Action=None, PathCost=0,
