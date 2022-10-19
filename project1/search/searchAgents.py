@@ -392,14 +392,16 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    current_point = state[0]
-    visited_corners = state[1]
+    current_point = state[0] # Coordinates of pacman's current state
+    visited_corners = state[1] # The corners that pacman has visited
     total_cost = 0
-    left_to_visit = []
+    left_to_visit = [] # Which corners are left to visit
     for corner in corners:
         if not corner in visited_corners:
             left_to_visit.append(corner)
     while left_to_visit:
+        """ Get the manhattan distance of the whole path cost 
+                until all left has been visited. """
         pair = min([(util.manhattanDistance(current_point,next_corner),next_corner) for next_corner in left_to_visit])
         current_point = pair[1]
         total_cost += pair[0]
