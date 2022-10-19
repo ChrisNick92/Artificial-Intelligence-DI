@@ -316,12 +316,12 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        point = state[0]
-        visited_corners = state[1]
+        point = state[0] # The coordinates of current point state
+        visited_corners = state[1] # List of visited corners
         if point in self.corners:
             if not point in visited_corners:
                 visited_corners.append(point)
-            return len(visited_corners) == 4
+            return len(visited_corners) == 4 # Have we visited all corners?
         return False
         util.raiseNotDefined()
 
@@ -346,13 +346,14 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-            x,y = state[0]
-            visited_corners = state[1]
+            x,y = state[0] # Point coordinates
+            visited_corners = state[1] # List of visited corners
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
-            if not self.walls[nextx][nexty]:
-                successors_visited_corners = list(visited_corners)
-                nextState = (nextx, nexty)
+            if not self.walls[nextx][nexty]: # If not wall
+                successors_visited_corners = list(visited_corners) # Successor's visited corner list
+                nextState = (nextx, nexty) # Point of nextState
+                """Check if nextState is corner and update"""
                 if nextState in self.corners and nextState not in visited_corners:
                     successors_visited_corners.append(nextState)
                 cost = self.costFn(nextState)
