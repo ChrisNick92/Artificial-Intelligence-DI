@@ -36,8 +36,9 @@ Good luck and happy searching!
 
 from distutils import core
 from tabnanny import check
-from turtle import pos
+from turtle import distance, pos
 from typing import List, Tuple, Any
+from xxlimited import foo
 from game import Directions
 from game import Agent
 from game import Actions
@@ -472,6 +473,8 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchFunction = lambda prob: search.aStarSearch(prob, foodHeuristic)
         self.searchType = FoodSearchProblem
 
+import itertools
+
 def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     Your heuristic for the FoodSearchProblem goes here.
@@ -503,15 +506,15 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
     food_left = foodGrid.asList()
+    gameState = problem.startingGameState
+    if position in food_left:
+        food_left.remove(position)
     if food_left:
-        value1,next_pos = min([(util.manhattanDistance(position,next_pos),next_pos) for next_pos in food_left])
-        food_left.remove(next_pos)
-        if food_left:
-            value2 = max([util.manhattanDistance(next_pos,farest_food) for farest_food in food_left])
-            return value1+value2
-        return value1
-    return 0
-
+        d = max([mazeDistance(position,point,gameState) for point in food_left])
+        return d
+    else: 
+        return 0
+    
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
     def registerInitialState(self, state):
