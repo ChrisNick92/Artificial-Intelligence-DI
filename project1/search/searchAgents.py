@@ -541,9 +541,9 @@ class ClosestDotSearchAgent(SearchAgent):
         startPosition = gameState.getPacmanPosition()
         food = gameState.getFood()
         walls = gameState.getWalls()
-        problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        problem = AnyFoodSearchProblem(gameState)
         return search.breadthFirstSearch(problem=problem)
         util.raiseNotDefined()
 
@@ -579,10 +579,9 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
+        "*** YOUR CODE HERE ***"
         _,goal = min([(util.manhattanDistance(state,goal), goal) for goal in self.food.asList()])
         return True if state == goal else False
-
-        "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:
