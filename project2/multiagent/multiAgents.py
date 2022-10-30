@@ -15,6 +15,7 @@
 from util import manhattanDistance
 from game import Directions
 import random, util
+import sys
 
 from game import Agent
 from pacman import GameState
@@ -70,13 +71,30 @@ class ReflexAgent(Agent):
         # Useful information you can extract from a GameState (pacman.py)
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         newPos = successorGameState.getPacmanPosition()
-        newFood = successorGameState.getFood()
+        newFood = successorGameState.getFood().asList()
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        print(newGhostStates[1])
-        return successorGameState.getScore()
+        total_score = 0
+        if newFood != []:
+            dist = min([manhattanDistance(newPos, food_pos) for food_pos in newFood])
+            total_score += 1/dist
+        ghost_distances = []
+        blue_ghost_distances = []
+        for i,num_moves in enumerate(newScaredTimes):
+            if num_moves == 0:
+                ghost_distances.append(successorGameState.getGhostPosition(i+1))
+            else:
+                blue_ghost_distances.append(successorGameState.getGhostPosition(i+1))
+        if ghost_distances != []:
+            d1 = min([manhattanDistance(newPos, ghostPos) for ghostPos in ghost_distances])
+            if d1 <= 2:
+                total_score = total_score + d1
+        if blue_ghost_distances != []:
+            d2 = min([manhattanDistance(newPos, ghostPos) for ghostPos in blue_ghost_distances])
+            total_score = total_score + 1/d2
+        return total_score + successorGameState.getScore()
 
 def scoreEvaluationFunction(currentGameState: GameState):
     """
