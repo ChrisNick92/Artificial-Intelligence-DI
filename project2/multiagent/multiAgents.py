@@ -155,7 +155,49 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
+        action = minimax_decision(gameState,self.depth,gameState.getNumAgents(), self.evaluationFunction)
+        return action
         util.raiseNotDefined()
+
+"""Utility functions for Minimax algorithm """
+import math # To use the infinity values
+
+def minimax_decision(gameState, depth, num_agents, evalFn):
+    value, action = max_value(gameState, depth, num_agents, evalFn)
+    return action
+
+def max_value(gameState, depth, num_agents, evalFn):
+    # Pacman makes a move
+    if gameState.isWin() or gameState.isLose() or depth == 0:
+        return evalFn(gameState), "Stop"
+    else:
+        v = -math.inf
+        for action in gameState.getLegalActions(0):
+            v_temp = min_value(gameState.generateSuccessor(0, action), depth, num_agents, evalFn, 1)
+            if v_temp > v:
+                best_action = action
+                v = v_temp
+        return v,best_action
+
+def min_value(gameState, depth, num_agents, evalFn, ghost_index):
+    # Enemy agents (ghosts) make their move
+    if gameState.isWin() or gameState.isLose() or depth == 0:
+        return evalFn(gameState)
+    else:
+        if ghost_index == num_agents-1: # The last ghost is now playing
+            v = math.inf
+            for action in gameState.getLegalActions(ghost_index):
+                v_temp,_ = max_value(gameState.generateSuccessor(ghost_index, action), depth-1, num_agents, evalFn)
+                if v_temp < v:
+                    v = v_temp
+            return v
+        else:
+            v = math.inf
+            for action in gameState.getLegalActions(ghost_index):
+                v_temp = min_value(gameState.generateSuccessor(ghost_index, action), depth, num_agents, evalFn, ghost_index+1)
+                if v_temp < v:
+                    v = v_temp
+            return v
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
