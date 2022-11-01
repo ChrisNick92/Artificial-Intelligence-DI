@@ -330,6 +330,36 @@ def betterEvaluationFunction(currentGameState: GameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
+    food_left = currentGameState.getFood().asList()
+    GhostStates = currentGameState.getGhostStates()
+    ScaredTimes = [ghostState.scaredTimer for ghostState in GhostStates]
+    GhostPositions = currentGameState.getGhostPositions()
+    capsules = currentGameState.getCapsules()
+    currentPos = currentGameState.getPacmanPosition()
+    
+    weights = {}
+    
+    evaluation_score = currentGameState.getScore()
+    if food_left != []:
+        food_dist = min([manhattanDistance(currentPos, foodPos) for foodPos in food_left])
+        weights["food"] = (1/food_dist, 1)
+    ghost_distances = []
+    white_ghost_distances = []
+    for idx, time in enumerate(ScaredTimes):
+        if time == 0: ghost_distances.append(GhostPositions[idx])
+        else: white_ghost_distances.append((GhostPositions[idx], time))
+    if white_ghost_distances != []:
+        time, white_ghost_dist = min([(manhattanDistance(currentPos, ghostPos[0]), ghostPos[1]) for ghostPos in white_ghost_distances])
+        if time < white_ghost_dist:
+            weights["Eat_ghosts"] = ((white_ghost_dist-time)*(1/white_ghost_dist), 40)
+    if capsules != []:
+        capsule_dist = min([manhattanDistance(currentPos, capsulePos) for capsulePos in capsules])
+        weights["capsules"] = (1/capsule_dist, 1)
+    
+    for val in weights.values():
+        evaluation_score += val[0]*val[1]
+        
+    return evaluation_score
     util.raiseNotDefined()
 
 # Abbreviation
