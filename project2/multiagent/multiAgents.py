@@ -15,7 +15,7 @@
 from util import manhattanDistance
 from game import Directions
 import random, util
-import sys
+import math # To use the infinity values
 
 from game import Agent
 from pacman import GameState
@@ -155,49 +155,48 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        action = minimax_decision(gameState,self.depth,gameState.getNumAgents(), self.evaluationFunction)
+        action = self.minimax_decision(gameState,self.depth,gameState.getNumAgents(), self.evaluationFunction)
         return action
         util.raiseNotDefined()
+    
+    """Utility functions for Minimax search"""
 
-"""Utility functions for Minimax algorithm """
-import math # To use the infinity values
-
-def minimax_decision(gameState, depth, num_agents, evalFn):
-    value, action = max_value(gameState, depth, num_agents, evalFn)
-    return action
-
-def max_value(gameState, depth, num_agents, evalFn):
-    # Pacman makes a move
-    if gameState.isWin() or gameState.isLose() or depth == 0:
-        return evalFn(gameState), "Stop"
-    else:
-        v = -math.inf
-        for action in gameState.getLegalActions(0):
-            v_temp = min_value(gameState.generateSuccessor(0, action), depth, num_agents, evalFn, 1)
-            if v_temp > v:
-                best_action = action
-                v = v_temp
-        return v,best_action
-
-def min_value(gameState, depth, num_agents, evalFn, ghost_index):
-    # Enemy agents (ghosts) make their move
-    if gameState.isWin() or gameState.isLose() or depth == 0:
-        return evalFn(gameState)
-    else:
-        if ghost_index == num_agents-1: # The last ghost is now playing
-            v = math.inf
-            for action in gameState.getLegalActions(ghost_index):
-                v_temp,_ = max_value(gameState.generateSuccessor(ghost_index, action), depth-1, num_agents, evalFn)
-                if v_temp < v:
-                    v = v_temp
-            return v
+    def minimax_decision(self, gameState, depth, num_agents, evalFn):
+        value, action = self.max_value(gameState, depth, num_agents, evalFn)
+        return action
+    
+    def max_value(self, gameState, depth, num_agents, evalFn):
+        # Pacman makes a move
+        if gameState.isWin() or gameState.isLose() or depth == 0:
+            return evalFn(gameState), "Stop"
         else:
-            v = math.inf
-            for action in gameState.getLegalActions(ghost_index):
-                v_temp = min_value(gameState.generateSuccessor(ghost_index, action), depth, num_agents, evalFn, ghost_index+1)
-                if v_temp < v:
+            v = -math.inf
+            for action in gameState.getLegalActions(0):
+                v_temp = self.min_value(gameState.generateSuccessor(0, action), depth, num_agents, evalFn, 1)
+                if v_temp > v:
+                    best_action = action
                     v = v_temp
-            return v
+            return v,best_action
+
+    def min_value(self, gameState, depth, num_agents, evalFn, ghost_index):
+        # Enemy agents (ghosts) make their move
+        if gameState.isWin() or gameState.isLose() or depth == 0:
+            return evalFn(gameState)
+        else:
+            if ghost_index == num_agents-1: # The last ghost is now playing
+                v = math.inf
+                for action in gameState.getLegalActions(ghost_index):
+                    v_temp,_ = self.max_value(gameState.generateSuccessor(ghost_index, action), depth-1, num_agents, evalFn)
+                    if v_temp < v:
+                        v = v_temp
+                return v
+            else:
+                v = math.inf
+                for action in gameState.getLegalActions(ghost_index):
+                    v_temp = self.min_value(gameState.generateSuccessor(ghost_index, action), depth, num_agents, evalFn, ghost_index+1)
+                    if v_temp < v:
+                        v = v_temp
+                return v
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -209,7 +208,60 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
+        action = self.alpha_beta_search(gameState, self.depth, gameState.getNumAgents(), self.evaluationFunction)
+        return action
         util.raiseNotDefined()
+    
+    """Utility functions for alpha-beta search"""
+    
+    def alpha_beta_search(self, gameState, depth, num_agents, evalFn):
+        a = -math.inf
+        b = math.inf
+        value, action = self.max_value(gameState, depth, num_agents, evalFn, a, b)
+        return action
+    
+    
+    def max_value(self, gameState, depth, num_agents, evalFn, a, b):
+    # Pacman makes a move
+        if gameState.isWin() or gameState.isLose() or depth == 0:
+            return evalFn(gameState), "Stop"
+        else:
+            v = -math.inf
+            for action in gameState.getLegalActions(0):
+                v_temp = self.min_value(gameState.generateSuccessor(0, action), depth, num_agents,
+                                        evalFn, 1, a, b)
+                if v_temp > v:
+                    best_action = action
+                    v = v_temp
+                if v > b: return v, action
+                a = max(a, v)
+            return v,best_action
+    
+    def min_value(self, gameState, depth, num_agents, evalFn, ghost_index, a, b):
+        # Enemy agents (ghosts) make their move
+        if gameState.isWin() or gameState.isLose() or depth == 0:
+            return evalFn(gameState)
+        else:
+            if ghost_index == num_agents-1: # The last ghost is now playing
+                v = math.inf
+                for action in gameState.getLegalActions(ghost_index):
+                    v_temp, _ = self.max_value(gameState.generateSuccessor(ghost_index, action), depth-1, num_agents,
+                                              evalFn, a , b)
+                    if v_temp < v:
+                        v = v_temp
+                    if v < a: return v
+                    b = min(v, b)
+                return v
+            else:
+                v = math.inf
+                for action in gameState.getLegalActions(ghost_index):
+                    v_temp = self.min_value(gameState.generateSuccessor(ghost_index, action), depth, num_agents, evalFn,
+                                            ghost_index+1, a, b)
+                    if v_temp < v:
+                        v = v_temp
+                    if v < a: return v
+                    b = min(v, b)
+                return v
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
