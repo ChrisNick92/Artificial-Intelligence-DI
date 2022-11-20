@@ -339,7 +339,7 @@ def betterEvaluationFunction(currentGameState: GameState):
     
     weights = {}
     
-    evaluation_score = currentGameState.getScore()
+    evaluation_score = 0
     if food_left != []:
         food_dist = min([manhattanDistance(currentPos, foodPos) for foodPos in food_left])
         weights["food"] = (1/food_dist, 1)
@@ -355,11 +355,11 @@ def betterEvaluationFunction(currentGameState: GameState):
     if capsules != []:
         capsule_dist = min([manhattanDistance(currentPos, capsulePos) for capsulePos in capsules])
         weights["capsules"] = (1/capsule_dist, 1)
-    
+        
     for val in weights.values():
         evaluation_score += val[0]*val[1]
-        
-    return evaluation_score
+
+    return evaluation_score + currentGameState.getScore()
     util.raiseNotDefined()
 
 # Abbreviation
