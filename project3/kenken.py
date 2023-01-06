@@ -84,6 +84,28 @@ class Clique():
         return f"Clique({self.points})"
 
 
+def get_clique_domain(clique: Clique, kenken_size: int):
+    M = len(clique.points)
+    return [*itertools.product(range(1, kenken_size + 1), repeat=M)]
+
+
+def clique_constraint(clique: Clique, val):
+    if clique.op == '+':
+        return sum(val) == clique.val
+
+    elif clique.op == '*':
+        return functools.reduce(lambda x, y: x * y, val) == clique.val
+
+    elif clique.op == '=':
+        return val[0] == clique.val
+
+    elif clique.op == '-':
+        return abs(val[0] - val[1]) == clique.val
+
+    elif clique.op == '/':
+        return max(val[0], val[1]) / min(val[0], val[1]) == clique.val
+
+
 def find_clique_domain(clique: Clique, kenken_size: int):
     if clique.op == '=':
         return [clique.val]
@@ -205,7 +227,7 @@ class Kenken(csp.CSP):
                 self.domains[var] = list(range(1, self.size + 1))
                 self.neighbors[var] = get_point_neighs(var, self.size, self.cliques)
             else:
-                self.domains[var] = find_clique_domain(var, self.size)
+                self.domains[var] = get_clique_domain(var, self.size)
                 self.neighbors[var] = var.points
 
     def kenken_constrains(self, A, a, B, b):
@@ -215,33 +237,19 @@ class Kenken(csp.CSP):
         # A is point, B a clique
         elif isinstance(A, str) and not isinstance(B, str):
             pt_index = B.points.index(A)
-            if isinstance(b, int):
-                if a == b:
-                    return True
-                else:
-                    self.conflicts += 1
-                    return False
+            if clique_constraint(B, b) and b[pt_index] == a:
+                return True
             else:
-                if b[pt_index] == a:
-                    return True
-                else:
-                    self.conflicts += 1
-                    return False
+                self.conflicts += 1
+                return False
         # A is a clique, B is point
         elif isinstance(B, str) and not isinstance(A, str):
             pt_index = A.points.index(B)
-            if isinstance(a, int):
-                if a == b:
-                    return True
-                else:
-                    self.conflicts += 1
-                    return False
+            if clique_constraint(A, a) and a[pt_index] == b:
+                return True
             else:
-                if a[pt_index] == b:
-                    return True
-                else:
-                    self.conflicts += 1
-                    return False
+                self.conflicts += 1
+                return False
         else:
             print("error!")
 
@@ -275,7 +283,7 @@ if __name__ == '__main__':
         default='backtracking',
         help='Whether to use backtracking or min_conflicts.'
     )
-    
+
     parser.add_argument(
         '-m',
         '--max_steps',
@@ -321,9 +329,9 @@ if __name__ == '__main__':
         print(f"Puzzle solved in {(tac - tic):.3f} seconds.\nTotal conflicts: {kenken.conflicts}")
         print(f"Output Solution:")
         kenken.display(res)
-    
+
     elif args.input and args.algorithm == 'min_conflicts':
-        
+
         file = args.input
         kenken = Kenken(file)
         print(f"Your input file: {file}\nYour puzzle's size: {kenken.size}")
