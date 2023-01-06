@@ -106,65 +106,6 @@ def clique_constraint(clique: Clique, val):
         return max(val[0], val[1]) / min(val[0], val[1]) == clique.val
 
 
-def find_clique_domain(clique: Clique, kenken_size: int):
-    if clique.op == '=':
-        return [clique.val]
-    elif clique.op == '*':
-        return prod_clique_domain(clique, kenken_size)
-    elif clique.op == '/':
-        return div_clique_domain(clique, kenken_size)
-    elif clique.op == '-':
-        return minus_clique_domain(clique, kenken_size)
-    elif clique.op == '+':
-        return sum_clique_domain(clique, kenken_size)
-
-
-def sum_clique_domain(clique: Clique, kenken_size: int):
-    n_points = len(clique.points)
-    val = clique.val
-    domain = []
-
-    for comb in itertools.product(range(1, kenken_size + 1), repeat=n_points):
-        if sum(list(comb)) == val:
-            domain.append(comb)
-    return domain
-
-
-def prod_clique_domain(clique: Clique, kenken_size: int):
-    n_points = len(clique.points)
-    val = clique.val
-    domain = []
-
-    for comb in itertools.product(range(1, kenken_size + 1), repeat=n_points):
-        if functools.reduce(lambda x, y: x * y, list(comb)) == val:
-            domain.append(comb)
-
-    return domain
-
-
-def div_clique_domain(clique: Clique, kenken_size: int):
-    val = clique.val
-    domain = []
-
-    for i in range(1, kenken_size + 1):
-        for j in range(1, kenken_size + 1):
-            if i / j == val or j / i == val:
-                domain.append((i, j))
-    return domain
-
-
-def minus_clique_domain(clique: Clique, kenken_size: int):
-    val = clique.val
-    domain = []
-
-    for i in range(1, kenken_size + 1):
-        for j in range(1, kenken_size + 1):
-            if abs(i - j) == val:
-                domain.append((i, j))
-
-    return domain
-
-
 def get_point_neighs(point: str, kenken_size: int, cliques: List[Clique]):
     neighs = set()
 
@@ -327,6 +268,7 @@ if __name__ == '__main__':
         res = csp.backtracking_search(kenken, select_unassigned_variable=select_unassinged_var, inference=inference)
         tac = time.perf_counter()
         print(f"Puzzle solved in {(tac - tic):.3f} seconds.\nTotal conflicts: {kenken.conflicts}")
+        print(f"Total assignments: {kenken.nassigns}")
         print(f"Output Solution:")
         kenken.display(res)
 
