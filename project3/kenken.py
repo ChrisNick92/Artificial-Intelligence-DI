@@ -288,6 +288,7 @@ if __name__ == '__main__':
             kenken.display(res)
         else:
             print(f"Max number of steps: {args.max_steps} exceeded without reaching to a solution.")
+            print(f"Total assignmens: {kenken.nassigns}")
 
     else:
         files = sorted(list(glob.glob(os.path.join(TESTS_PATH, "*.txt"))))
