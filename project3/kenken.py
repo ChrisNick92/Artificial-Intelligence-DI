@@ -83,30 +83,55 @@ class Clique():
     def __repr__(self):
         return f"Clique({self.points})"
 
-
-def get_clique_domain(clique: Clique, kenken_size: int):
-    M = len(clique.points)
-    return [*itertools.product(range(1, kenken_size + 1), repeat=M)]
-
-
-def clique_constraint(clique: Clique, val):
-    if clique.op == '+':
-        return sum(val) == clique.val
-
-    elif clique.op == '*':
-        return functools.reduce(lambda x, y: x * y, val) == clique.val
-
-    elif clique.op == '=':
-        return val[0] == clique.val
-
-    elif clique.op == '-':
-        return abs(val[0] - val[1]) == clique.val
-
-    elif clique.op == '/':
-        return max(val[0], val[1]) / min(val[0], val[1]) == clique.val
+    def __contains__(self, key):
+        return key in self.points
+    
+    def __eq__(self, other):
+        return self.points == other.points
 
 
-def get_point_neighs(point: str, kenken_size: int, cliques: List[Clique]):
+def clique_constraints(cliques: List[Clique], assignment: dict):
+    for y in cliques:
+        vals = []
+        for var, val in assignment.items():
+            if var in y:
+                vals.append(val)
+
+        if len(vals) == len(y.points):
+            if y.op == '+':
+                if sum(vals) != y.val:
+                    return False
+
+            elif y.op == '*':
+                prod = functools.reduce(lambda x, y: x * y, vals)
+                if prod != y.val:
+                    return False
+
+            elif y.op == '=':
+                if vals[0] != y.val:
+                    return False
+
+            elif y.op == '/':
+                if max(vals[0], vals[1]) / min(vals[0], vals[1]) != y.val:
+                    return False
+
+            elif y.op == '-':
+                if abs(vals[0] - vals[1]) != y.val:
+                    return False
+                
+        elif vals and y.op == '+':
+            if sum(vals) > y.val:
+                return False
+            
+        elif vals and y.op == '*':
+            prod = functools.reduce(lambda x, y: x * y, vals)
+            if prod > y.val:
+                return False
+
+    return True
+
+
+def get_point_neighs(point: str, kenken_size: int):
     neighs = set()
 
     r, c = divmod(int(point), kenken_size)
@@ -115,9 +140,9 @@ def get_point_neighs(point: str, kenken_size: int, cliques: List[Clique]):
         .union({str(r*kenken_size + j) for j in range(kenken_size) if r*kenken_size+j != int(point)})
 
     # find clique neighbors
-    for c in cliques:
-        if point in c.points:
-            neighs.add(c)
+    # for c in cliques:
+    #     if point in c.points:
+    #         neighs.add(c)
 
     return neighs
 
@@ -142,11 +167,13 @@ class Kenken(csp.CSP):
         self.cliques = []
         self.domains = dict()
         self.neighbors = dict()
-
+        self.var_to_clique = dict()
+        
         self.read_file(input_file)
 
         self.get_domains_and_neighbors()
         self.conflicts = 0
+        self.current = None
 
         super().__init__(None, self.domains, self.neighbors, self.kenken_constrains)
 
@@ -160,39 +187,29 @@ class Kenken(csp.CSP):
                     variables = re.compile(r"(\d+)").findall(line[1])
                     clique = Clique(int(line[0]), line[2], list(variables))
                     self.cliques.append(clique)
-                    self.variables += [*variables, clique]
+                    self.variables += variables
+                    
+                    for var in variables:
+                        self.var_to_clique[var] = clique
 
     def get_domains_and_neighbors(self):
         for var in self.variables:
             if isinstance(var, str):
                 self.domains[var] = list(range(1, self.size + 1))
-                self.neighbors[var] = get_point_neighs(var, self.size, self.cliques)
-            else:
-                self.domains[var] = get_clique_domain(var, self.size)
-                self.neighbors[var] = var.points
+                self.neighbors[var] = get_point_neighs(var, self.size)
 
     def kenken_constrains(self, A, a, B, b):
         # Both points
-        if isinstance(A, str) and isinstance(B, str):
-            return a != b
-        # A is point, B a clique
-        elif isinstance(A, str) and not isinstance(B, str):
-            pt_index = B.points.index(A)
-            if clique_constraint(B, b) and b[pt_index] == a:
-                return True
-            else:
-                self.conflicts += 1
-                return False
-        # A is a clique, B is point
-        elif isinstance(B, str) and not isinstance(A, str):
-            pt_index = A.points.index(B)
-            if clique_constraint(A, a) and a[pt_index] == b:
-                return True
-            else:
-                self.conflicts += 1
-                return False
+        assignment = self.current if self.current != None else self.infer_assignment()
+        if self.var_to_clique[A] == self.var_to_clique[B]:
+            cliques = [self.var_to_clique[A]]
         else:
-            print("error!")
+            cliques = [self.var_to_clique[A], self.var_to_clique[B]]
+        if a != b and clique_constraints(cliques, assignment):
+            return True
+        else:
+            self.conflicts += 1
+            return False
 
     def display(self, assignment):
         for i in range(self.size * self.size):
