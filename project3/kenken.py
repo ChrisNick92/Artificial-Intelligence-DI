@@ -142,11 +142,13 @@ class Kenken(csp.CSP):
         self.cliques = []
         self.domains = dict()
         self.neighbors = dict()
+        self.var_to_clique = dict()
 
         self.read_file(input_file)
 
         self.get_domains_and_neighbors()
         self.conflicts = 0
+        self.current = None
 
         super().__init__(None, self.domains, self.neighbors, self.kenken_constrains)
 
